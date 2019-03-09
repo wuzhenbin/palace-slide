@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>九宫格验证</title>
+    <link rel="stylesheet" href="css/base.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+    <script>
+        function resize(originSize,type) {
+            var type=type||"x";
+            var widths=document.documentElement.clientWidth;
+            var heights=document.documentElement.clientHeight;
+            if(type=="x"){
+                var scalex=widths/originSize*100;
+                document.querySelector("html").style.fontSize=scalex+"px";
+            }else if(type=="y"){
+                var scaley=heights/originSize*100;
+                document.querySelector("html").style.fontSize=scaley+"px";
+            }
+        }
+        resize(750);
+    </script>
+    <style>
+        .nine-gongge{
+            position: fixed;top: 0;left: 0;right: 0;bottom: 0;margin: auto;background-color: rgba(0,0,0,.6);
+            z-index: 9999;display: flex;display: -webkit-flex;flex-direction: column;justify-content: center;visibility: visible;
+        }
+        .nine-gongge .close-bg{
+            position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;
+        }
+        .nine-gongge .box{
+            width: 80%;background-color: #fff;margin: 0 auto;padding: .2rem;border-radius: 10px;
+            position: relative;z-index: 99999;
+        }
+        .box-title{
+            width: 100%;text-align: center;line-height: .6rem;font-size: .24rem;color: #666;
+        }
+        .box-show{
+            width: 100%;text-align: center;line-height: .6rem;font-size: .28rem;color: #25cc5a;
+        }
+        .box-num{
+            width: 100%;text-align: center;line-height: .8rem;font-size: .4rem;color: #dd2628;
+            font-weight: 600;
+        }
+        .box ul{
+            width: 4.5rem;height: 4.5rem;margin: 0 auto;
+        }
+        .box ul li{
+            border-right: 1px solid #ddd;border-bottom: 1px solid #ddd;cursor: pointer;
+            float: left;width: 1.5rem;height: 1.5rem;text-align: center;line-height: 1.5rem;
+        }
+        .box ul li:nth-child(3n){
+            border-right: none;
+        }
+        .box ul li:nth-child(7),.box ul li:nth-child(8),.box ul li:nth-child(9){
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="h-return">
+        <a href="javascript:;" onclick="history.go(-1)"><i class="iconfont icon-fanhui"></i></a>
+    </div>
+    <div class="h-con">
+        请刷新再试
+    </div>
+</header>
+<div class="main">
+</div>
+<div class="nine-gongge">
+    <div class="close-bg"></div>
+    <div class="box">
+        <div class="box-title">系统检测到异常行为，请先进行九宫格验证</div>
+        <div class="box-show">请在下方键盘中依次点击</div>
+        <div class="box-num"><i></i>-<i></i>-<i></i>-<i></i></div>
+        <div class="box-show">点击九宫格输入</div>
+        <ul class="clear">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</div>
+<script src="layer/layer.js"></script>
+<script src="js/fastclick.js"></script>
+<script type="text/javascript">
+$(function () {
+    //打开九宫格弹窗
+    $(".nine-gongge").css("visibility","visible");
+    var mynums;var mycars;
+    var clickNum=0;
+    var yesNum=0;
+    var flags=false;
+    //初始化
+    init();
+    function init() {
+        mynums=[];mycars =[];
+        mynums = [1,2,3,4,5,6,7,8,9];
+        mycars = [1,2,3,4,5,6,7,8,9];
+        mynums.sort(function(a, b){
+            return 0.5 - Math.random()
+        });
+        $(".box-num i").eq(0).html(mynums[0]);
+        $(".box-num i").eq(1).html(mynums[1]);
+        $(".box-num i").eq(2).html(mynums[2]);
+        $(".box-num i").eq(3).html(mynums[3]);
+        mycars.sort(function(a, b){
+            return 0.5 - Math.random()
+        });
+        $(".nine-gongge .box ul li").each(function (index) {
+            $(this).text(mycars[index]).attr("num",mycars[index]);
+        });
+        //初始化
+        clickNum=0;yesNum=0;flags=false;
+    }
+   $(".nine-gongge .box ul li").click(function () {
+//       console.log("第"+clickNum+"次点击");
+       if(clickNum<4){
+           if($(this).attr("num")==$(".box-num i").eq(clickNum).html()){
+               if(clickNum == 3 && yesNum==3){
+                   flags=true;
+               }
+               if(flags){
+                   layer.msg("解除异常成功",{time:1000});
+                   $(".nine-gongge").css("visibility","hidden");
+                   return init();
+               }
+               yesNum++;
+           }
+           if(clickNum==3 && flags==false){
+//               console.log("点击4次失败");
+               layer.msg("解除异常失败",{time:1000});
+               return init();
+           }
+           clickNum++;
+       }else{
+//           console.log("超过点击次数");
+           layer.msg("解除异常失败",{time:1000});
+           return init();
+       }
+   });
+    //点击背景关闭
+   $(".nine-gongge .close-bg").click(function () {
+       $(".nine-gongge").css("visibility","hidden");
+   }) 
+})    
+</script>
+<script>
+    $(function () {
+        FastClick.attach(document.body);
+    })
+</script>
+</body>
+</html>
